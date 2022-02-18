@@ -1,0 +1,41 @@
+---
+- name: generate mysql root password
+  shell:
+    test -f /root/.my.cnf
+    && (grep ^password /root/.my.cnf | head -1 | awk '{print $3}' | tr -d "'")
+    || (cat /dev/urandom | tr -dc '[:alnum:]-./=@_' | head -c 32)
+  changed_when: False
+  register: last_result
+
+- name: set variable
+  set_fact:
+    mysql_root_pass: "{{ last_result.stdout }}"
+
+- name: put .my.cnf
+  template:
+    src: root/.my.cnf.j2
+    dest: /root/.my.cnf
+    mode: 0600
+
+- name: specify mysql root password before installing
+  debconf:
+    name: mysql-server
+    question: "mysql-server/root_password"
+    value: "{{ mysql_root_pass | quote }}"
+    vtype: password
+  changed_when: False
+
+- name: specify mysql root password before installing
+  debconf:
+    name: mysql-server
+    question: "mysql-server/root_password_again"
+    value: "{{ mysql_root_pass | quote }}"
+    vtype: password
+  changed_when: False
+
+- name: install packages
+  apt:
+    name:
+      - mysql-server
+      - python3-pymysql
+    update_cache: yes

@@ -1,0 +1,87 @@
+---
+- name: install package
+  apt:
+    deb: https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-1+ubuntu20.04_all.deb
+
+- name: install packages
+  apt:
+    name:
+      - zabbix-server-mysql
+      - zabbix-frontend-php
+      - zabbix-nginx-conf
+      - zabbix-sql-scripts
+      - zabbix-agent
+    update_cache: yes
+
+- name: get mysql user password
+  shell:
+    test -f /var/lib/zabbix/.my.cnf
+    && (grep ^password /root/.my.cnf | head -1 | awk '{print $3}' | tr -d "'")
+    || (cat /dev/urandom | tr -dc '[:alnum:]-./=@_' | head -c 32)
+  changed_when: False
+  register: last_result
+
+- name: set variable
+  set_fact:
+    mysql_user_pass: "{{ last_result.stdout }}"
+
+- name: create home directory
+  file:
+    path: /var/lib/zabbix
+    state: directory
+    owner: zabbix
+    group: zabbix
+    mode: 0755
+
+- name: put .my.cnf
+  template:
+    src: var/lib/zabbix/.my.cnf.j2
+    dest: /var/lib/zabbix/.my.cnf
+    owner: zabbix
+    group: zabbix
+    mode: 0600
+
+- name: create mysql database
+  mysql_db:
+    name: zabbix
+    encoding: utf8mb4
+    collation: utf8mb4_bin
+
+- name: create mysql tables
+  shell:
+    zcat /usr/share/doc/zabbix-sql-scripts/mysql/server.sql.gz \
+    | mysql zabbix \
+    && touch /var/lib/zabbix/.zabbix.schema.imported
+  args:
+    creates: /var/lib/zabbix/.zabbix.schema.imported
+
+- name: create mysql user
+  mysql_user:
+    name: zabbix
+    password: "{{ mysql_user_pass }}"
+    priv: "zabbix.*:ALL"
+
+- name: modify zabbix_server.conf
+  lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    regexp: "^DBPassword="
+    insertafter: "^# DBPassword="
+    line: "DBPassword={{ mysql_user_pass }}"
+  notify: restart zabbix-server
+
+- name: create zabbix.conf.php
+  shell: cp -p /usr/share/zabbix/conf/zabbix.conf.php.example /etc/zabbix/web/zabbix.conf.php
+  args:
+    creates: /etc/zabbix/web/zabbix.conf.php
+
+- name: modify zabbix.conf.php
+  lineinfile:
+    path: /etc/zabbix/web/zabbix.conf.php
+    regexp: '^\$DB.*PASSWORD'
+    line: "$DB['PASSWORD'] = '{{ mysql_user_pass }}';"
+
+- name: remove nginx default config
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: restart nginx

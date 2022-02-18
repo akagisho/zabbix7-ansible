@@ -1,0 +1,8 @@
+---
+- hosts: default
+  become: yes
+  roles:
+    - ubuntu20-common
+    - postfix
+    - mysql-server
+    - zabbix-server
