@@ -11,6 +11,7 @@
       - zabbix-nginx-conf
       - zabbix-sql-scripts
       - zabbix-agent
+      - zabbix-get
     update_cache: yes
 
 - name: get mysql user password
