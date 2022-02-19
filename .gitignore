@@ -1,2 +1,3 @@
 .vagrant
 inventories/production/hosts
+inventories/production/group_vars/default.yml

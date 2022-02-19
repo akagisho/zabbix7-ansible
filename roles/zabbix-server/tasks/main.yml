@@ -69,6 +69,15 @@
     line: "DBPassword={{ mysql_user_pass }}"
   notify: restart zabbix-server
 
+- name: modify zabbix_server.conf
+  lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    regexp: "^{{ item.key }}="
+    insertafter: "^# {{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ zabbix_server.config }}"
+  notify: restart zabbix-server
+
 - name: create zabbix.conf.php
   shell: cp -p /usr/share/zabbix/conf/zabbix.conf.php.example /etc/zabbix/web/zabbix.conf.php
   args:
