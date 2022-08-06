@@ -8,3 +8,8 @@
   systemd:
     name: nginx
     state: restarted
+
+- name: install cpan modules
+  shell:
+    cmd: /usr/local/bin/cpanm --installdeps -L local .
+    chdir: /usr/lib/zabbix/externalscripts

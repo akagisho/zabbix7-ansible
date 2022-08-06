@@ -12,7 +12,14 @@
       - zabbix-sql-scripts
       - zabbix-agent
       - zabbix-get
+      - jq
     update_cache: yes
+
+- name: install cpanminus
+  get_url:
+    url: https://cpanmin.us/
+    dest: /usr/local/bin/cpanm
+    mode: 0755
 
 - name: get mysql user password
   shell:
@@ -95,3 +102,17 @@
     path: /etc/nginx/sites-enabled/default
     state: absent
   notify: restart nginx
+
+- name: put cpanfile
+  copy:
+    src: usr/lib/zabbix/externalscripts/cpanfile
+    dest: /usr/lib/zabbix/externalscripts/cpanfile
+  notify: install cpan modules
+
+- name: put external scripts
+  copy:
+    src: "{{ item }}"
+    dest: /usr/lib/zabbix/externalscripts/
+    mode: 0755
+  with_fileglob:
+    - usr/lib/zabbix/externalscripts/*.*
