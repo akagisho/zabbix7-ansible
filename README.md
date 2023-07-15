@@ -4,7 +4,7 @@ Set up Zabbix 6.0 server using by Ansible.
 
 ## Requirements
 
-* Ubuntu Server 20.04
+* Ubuntu Server 22.04
 * Ansible
 
 For local development environment:
@@ -16,7 +16,7 @@ For local development environment:
 
 ### production
 
-First of all, set up Ubuntu 20.04 to the server.
+First of all, set up Ubuntu 22.04 to the server.
 
 Create Ansible inventory file.
 

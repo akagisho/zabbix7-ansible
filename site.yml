@@ -2,7 +2,7 @@
 - hosts: default
   become: yes
   roles:
-    - ubuntu20-common
+    - ubuntu22-common
     - postfix
     - mysql-server
     - zabbix-server

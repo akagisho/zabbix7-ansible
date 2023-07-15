@@ -1,7 +1,7 @@
 ---
 - name: install package
   apt:
-    deb: https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-1+ubuntu20.04_all.deb
+    deb: https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest%2Bubuntu22.04_all.deb
 
 - name: install packages
   apt:
@@ -57,7 +57,7 @@
 
 - name: create mysql tables
   shell:
-    zcat /usr/share/doc/zabbix-sql-scripts/mysql/server.sql.gz \
+    zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz \
     | mysql zabbix \
     && touch /var/lib/zabbix/.zabbix.schema.imported
   args:
