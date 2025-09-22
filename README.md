@@ -1,6 +1,6 @@
-# zabbix6-ansible
+# zabbix7-ansible
 
-Set up Zabbix 6.0 server using by Ansible.
+Set up Zabbix 7.0 server using by Ansible.
 
 ## Requirements
 
