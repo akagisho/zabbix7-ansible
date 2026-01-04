@@ -2,4 +2,4 @@
 zabbix_server:
   config:
     - key: CacheSize
-      value: 8M
+      value: 32M
